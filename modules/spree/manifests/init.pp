@@ -1,0 +1,2 @@
+define spree::site($name){
+}
