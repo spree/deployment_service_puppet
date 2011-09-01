@@ -1,0 +1,61 @@
+upstream unicorn_<%= app_name %> {
+  server unix:/data/<%= app_name %>/shared/sockets/unicorn.sock fail_timeout=0;
+}
+
+server {
+  listen 80;
+  client_max_body_size 4G;
+  server_name _;
+
+  keepalive_timeout 5;
+
+  root /data/<%= app_name %>/current/public;
+
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+
+    if (!-f $request_filename) {
+      proxy_pass http://unicorn_<%= app_name %>;
+      break;
+    }
+  }
+
+  error_page 500 502 503 504 /500.html;
+  location = /500.html {
+    root /data/<%= app_name %>/current/public;
+  }
+}
+
+server {
+  listen 443;
+  server_name <%= app_name %>.spreeworks.com;
+
+  ssl on;
+  ssl_certificate         /etc/ssl/spreeworks_combined.crt;
+  ssl_certificate_key     /etc/ssl/star_spreeworks_com.key;
+  ssl_protocols SSLv3 TLSv1;
+  ssl_ciphers ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:!LOW:!SSLv2:!EXPORT;
+
+  root /data/<%= app_name %>/current/public;
+
+  location / {
+    proxy_set_header X_FORWARDED_PROTO https;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header  X-Url-Scheme $scheme;
+    proxy_max_temp_file_size 0;
+    proxy_redirect off;
+
+    if (!-f $request_filename) {
+      proxy_pass http://unicorn_<%= app_name %>;
+      break;
+    }
+  }
+
+  error_page 500 502 503 504 /500.html;
+  location = /500.html {
+    root /data/<%= app_name %>/current/public;
+  }
+}

@@ -1,0 +1,6 @@
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+
+LANG="en_US"
+LANGUAGE="en_US:en"
+
+RAILS_ENV=production

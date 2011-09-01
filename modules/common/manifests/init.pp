@@ -8,10 +8,30 @@ class common {
     managehome => 'true',
     groups => ['www-data', 'sudo']
   }
+ 
+  file {'/etc/init':
+    group => 'spree',
+    mode => 755,
+    require => User['spree']
+  }
+
+  file {'/etc/environment':
+    ensure => 'present',
+    content => template('common/etc/environment')
+  }
+ 
+  spree::app{"$app_name":
+    require => User['spree']
+  }
 
   include rvm::system
   rvm::system_user { spree:
     require => User['spree']
+  }
+
+  file {"/etc/gemrc":
+    ensure => "present",
+    source  => "puppet:///modules/common/gemrc"
   }
 
   if $rvm_installed == "true" {
@@ -32,4 +52,8 @@ class common {
         require => Rvm_system_ruby['ruby-1.8.7-p352']
     }
   } 
+
+  package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2']:
+    ensure => 'present'
+  }
 }

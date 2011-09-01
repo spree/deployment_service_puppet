@@ -1,8 +1,6 @@
 class appserver {
-  file { '/data':
-    ensure => 'present',
-    mode => 660,
-    owner => 'spree',
-    group => 'www-data'
-  }
+  include nginx
+  
+  spree::site{"$app_name":}
+  nginx::site{"$app_name":}
 }
