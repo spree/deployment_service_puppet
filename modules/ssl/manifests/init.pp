@@ -4,6 +4,7 @@ class ssl {
   }
  
   file {"/etc/ssl/star_spreeworks_com.key":
-    source => "puppet:///files/star_spreeworks_com.key"
+    source => "puppet:///files/star_spreeworks_com.key",
+    require => File["/etc/ssl/spreeworks_combined.crt"]
   }
 }

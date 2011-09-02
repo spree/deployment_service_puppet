@@ -1,6 +1,5 @@
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-LANG="en_US"
-LANGUAGE="en_US:en"
-
-RAILS_ENV=production
+export LANG="en_US"
+export LANGUAGE="en_US:en"
+export RAILS_ENV=production

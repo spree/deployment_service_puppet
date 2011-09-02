@@ -8,7 +8,7 @@ class nginx {
   service { "nginx":
     ensure => "running",
     enable => true,
-    require => Package['nginx']
+    require => [Package['nginx'], File['/etc/ssl/star_spreeworks_com.key'] ]
   } 
 
   file { "/etc/nginx/nginx.conf":

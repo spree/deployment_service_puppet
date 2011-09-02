@@ -2,7 +2,7 @@ class dbserver {
   include mysql::server
 
   augeas { "my.cnf/mysqld-spree":
-  context => "${mysql::params::mycnfctx}/mysqld/",
+    context => "${mysql::params::mycnfctx}/mysqld/",
     load_path => "/usr/share/augeas/lenses/contrib/",
     changes => [
      "set bind-address ${db_server}",
