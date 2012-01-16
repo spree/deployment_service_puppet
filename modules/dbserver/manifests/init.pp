@@ -1,5 +1,10 @@
 class dbserver {
-  include mysql::server
+  case $db_server_type {
+      'medium': { include mysql::server::medium } 
+      'large':  { include mysql::server::large  } 
+      'huge':   { include mysql::server::huge  } 
+      default:  { include mysql::server::medium } 
+  }
 
   augeas { "my.cnf/mysqld-spree":
     context => "${mysql::params::mycnfctx}/mysqld/",

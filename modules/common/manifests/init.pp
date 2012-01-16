@@ -1,77 +1,39 @@
 class common {
-  include augeas
+  include ruby
 
-  service {"puppet":
-    ensure => "running",
-    enable => true,
-    require =>[ Augeas['set puppet start default'], Augeas['set puppet pluginsync'] ]
-  }
-  
-  augeas {"set puppet start default":
-    context => "/files/etc/default/puppet",
-    changes => "set START yes",
-    notify => Service['puppet']
+  ssh_authorized_key{"root_pm_key":
+    key =>"AAAAB3NzaC1yc2EAAAABIwAAAQEA4tcVpddMlb2BvxBIticqJy5WkR34FEEOvQApKvjWUWXCFyPIS4UCs+jC4a8Ix4fxukgimQIAxC9nlWnn1oRZLjotPLCS23nH108zTIqInVieVHMdXmq0p7DHtXun1tFstyQVodssbU7XXQhM1VWCLlReGTbJdVHrJ/6czTUaO7opEa8l1ZsX8aFh0bx21SdVBuvXf5y6nEmiXMHD90ucF1TrGmPLiWBkFkrT+o/n0Gt6BxrWZ+5dDHViqN6tKpvfPfg5olHCSUe/j+uqTK3jNZImcFZKdJy3dqV4AKNxVbEknAQOPHT3Od9McIYqQz/b67OukRWuGR860czkAzvvKw==",
+    type => "rsa",
+    user => "root"
   }
 
-  augeas { "set puppet pluginsync":
-    context => "/files/etc/puppet/puppet.conf/main",
-    changes => "set pluginsync true",
-    notify => Service['puppet']
+  cron { "ntpdate_set":
+    command => "/usr/sbin/ntpdate ntp.ubuntu.com",
+    hour => [10], #times are UTC!
+    minute => fqdn_rand(59)
   }
 
-  user {'spree':
+  file {'/etc/sudoers':
     ensure => 'present',
-    home => '/home/spree',
-    shell => '/bin/bash',
-    managehome => 'true',
-    groups => ['www-data', 'sudo']
-  }
- 
-  file {'/etc/init':
-    group => 'spree',
-    mode => 775,
-    require => User['spree']
+    mode => 440,
+    source  => "puppet:///modules/common/sudoers"
   }
 
   file {'/etc/environment':
     ensure => 'present',
-    content => template('common/etc/environment')
-  }
- 
-  spree::app{"$app_name":
-    require => User['spree']
+    source  => ["/data/config/environment", "/data/config/environment.generated"],
+    require => [ File['/data/config/environment.generated'] ]
   }
 
-  include rvm::system
-  rvm::system_user { spree:
-    require => User['spree']
-  }
-
-  file {"/etc/gemrc":
-    ensure => "present",
-    source  => "puppet:///modules/common/gemrc"
-  }
-
-  if $rvm_installed == "true" {
-    rvm_system_ruby {'ruby-1.8.7-p352':
-      ensure => 'present',
-      default_use => true
-    }
-	
-    rvm_gem {
-      'ruby-1.8.7/bundler':
-        ensure => 'present',
-        require => Rvm_system_ruby['ruby-1.8.7-p352']
-    }
-
-    rvm_gem {
-      'ruby-1.8.7/rake':
-        ensure => 'present',
-        require => Rvm_system_ruby['ruby-1.8.7-p352']
-    }
-  } 
-
-  package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2']:
-    ensure => 'present'
+  file {["/data", "/data/config"]:
+    ensure => "directory", 
+    owner => "spree", 
+    group => "www-data", 
+    mode => 660 
+  }   
+  
+  file {'/data/config/environment.generated':
+    content  => template("common/environment.erb"),
+    require => [ File['/data'], File['/data/config'] ]
   }
 }

@@ -16,7 +16,8 @@ mv /var/lib/puppet/ssl/private_keys/$1.pem /var/lib/puppet/ssl/export/private_ke
 sshpass -p $3 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeychecking=no root@$2 "bash < <(curl -s http://spreeworks.heroku.com/install?fqdn=${1})"
 
 # copy over certs
-sshpass -p $3 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeychecking=no -r /var/lib/puppet/ssl/export/ root@$2:/var/lib/puppet/ssl/
+echo "copying certs"
+sshpass -p $3 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeychecking=no -r /var/lib/puppet/ssl/export/* root@$2:/var/lib/puppet/ssl/
 
 # remove local certs
 rm -r /var/lib/puppet/ssl/export/*.pem

@@ -1,1 +1,1 @@
-web: bundle exec unicorn_rails -c /data/<%= name %>/shared/config/unicorn.rb -p $PORT -E production
+web: bundle exec unicorn_rails -c /data/<%= name %>/shared/config/unicorn.rb -p $PORT -E <%= rails_env %>
