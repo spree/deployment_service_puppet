@@ -21,10 +21,4 @@ class puppetclient{
     context => "/files/etc/puppet/puppet.conf/main",
     changes => "set pluginsync true"
   }
-
-  cron { "run_puppet_run":
-    command => "/bin/bash -l -c '/usr/bin/puppet agent --onetime --no-daemonize --logdest console'",
-    hour => [7,8,9,10], #times are UTC!
-    minute => fqdn_rand(59)
-  }
 }

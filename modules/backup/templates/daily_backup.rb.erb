@@ -21,13 +21,4 @@ Backup::Model.new(:today, 'Client: <%= client_code %> Application: <%= app_name 
   compress_with Gzip do |compression|
     compression.best = true
   end
-
-  store_with SCP do |server|
-    server.username = '<%= client_code %>'
-    server.password = '<%= db_pass %>'
-    server.ip       = '50.57.122.230'
-    server.port     = 22
-    server.path     = '/backups/<%= client_code %>/<%= app_name %>'
-    server.keep     = 2
-  end
 end

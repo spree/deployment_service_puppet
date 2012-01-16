@@ -1,10 +1,4 @@
 class ruby {
-  ssh_authorized_key{"spree_pm_key":
-    key =>"AAAAB3NzaC1yc2EAAAABIwAAAQEA4tcVpddMlb2BvxBIticqJy5WkR34FEEOvQApKvjWUWXCFyPIS4UCs+jC4a8Ix4fxukgimQIAxC9nlWnn1oRZLjotPLCS23nH108zTIqInVieVHMdXmq0p7DHtXun1tFstyQVodssbU7XXQhM1VWCLlReGTbJdVHrJ/6czTUaO7opEa8l1ZsX8aFh0bx21SdVBuvXf5y6nEmiXMHD90ucF1TrGmPLiWBkFkrT+o/n0Gt6BxrWZ+5dDHViqN6tKpvfPfg5olHCSUe/j+uqTK3jNZImcFZKdJy3dqV4AKNxVbEknAQOPHT3Od9McIYqQz/b67OukRWuGR860czkAzvvKw==",
-    type => "rsa",
-    user => "spree"
-  }
-
   user {'spree':
     ensure => 'present',
     home => '/home/spree',
@@ -12,7 +6,7 @@ class ruby {
     managehome => 'true',
     groups => ['www-data', 'sudo']
   }
-  
+
   file {'/etc/init':
     group => 'spree',
     mode => 775,
@@ -24,6 +18,7 @@ class ruby {
   }
 
   include rvm::system
+
   rvm::system_user { spree:
     require => User['spree']
   }
@@ -38,7 +33,7 @@ class ruby {
       ensure => 'present',
       default_use => true
     }
-        
+
     rvm_gem {"${ruby_version}/bundler":
         ensure => 'present',
         require => Rvm_system_ruby[$ruby_version]
