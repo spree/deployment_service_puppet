@@ -1,5 +1,5 @@
 class nginx {
-  include ssl
+#  include ssl
 
   package { "nginx":
     ensure => "present"
@@ -25,21 +25,21 @@ class nginx {
 
 define nginx::site {
 
-  file {"/etc/ssl/${name}.crt":
-    source => ["/data/config/ssl/${name}.crt", "/data/ssl/${name}.crt", "puppet:///files/spreeworks_combined.crt"],
-    notify => Service['nginx']
-  }
+  #file {"/etc/ssl/${name}.crt":
+  #  source => ["/data/config/ssl/${name}.crt", "/data/ssl/${name}.crt", "puppet:///files/spreeworks_combined.crt"],
+  #  notify => Service['nginx']
+  #}
 
-  file {"/etc/ssl/${name}.key":
-    source => ["/data/config/ssl/${name}.key", "/data/ssl/${name}.key", "puppet:///files/star_spreeworks_com.key"],
-    notify => Service['nginx']
-  }
+  #file {"/etc/ssl/${name}.key":
+  #  source => ["/data/config/ssl/${name}.key", "/data/ssl/${name}.key", "puppet:///files/star_spreeworks_com.key"],
+  #  notify => Service['nginx']
+  #}
 
   # uses generated file from below, or overriden version
   #
   file { "/etc/nginx/sites-available/${name}":
     source => ["/data/config/nginx/${name}", "/data/config/nginx/${name}.generated"],
-    require => [ Package['nginx'], File["/data/config/nginx/${name}.generated"], File["/etc/ssl/${name}.crt"], File["/etc/ssl/${name}.key"] ],
+    require => [ Package['nginx'] ],# File["/data/config/nginx/${name}.generated"], File["/etc/ssl/${name}.crt"], File["/etc/ssl/${name}.key"] ],
     notify => Service['nginx']
   }
 

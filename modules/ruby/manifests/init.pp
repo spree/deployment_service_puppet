@@ -68,7 +68,7 @@ class ruby {
     creates => "/home/spree/ruby-build",
     path    => ["/usr/bin", "/usr/sbin"],
     timeout => 100,
-    require => [Package['git-core'], User['spree']
+    require => [Package['git-core'], User['spree']]
   }
 
   exec { "install ruby-build":
@@ -90,7 +90,8 @@ class ruby {
     command => "ruby-build 1.9.3-p0 /usr/local",
     user    => "root",
     group   => "root",
-    creates => "/usr/local/ruby"
+    creates => "/usr/local/bin/ruby",
+    timeout => 0, #disable timeout
     path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
     require => [ Exec['install ruby-build'], File['/usr/rubies'] ]
   }
