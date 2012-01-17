@@ -17,7 +17,6 @@ class common {
     ensure => present,
     mode   => 777,
     content  => template("common/set_env_vars.sh.erb"),
-    source => "puppet:///common/shellvars.aug",
   }
 
   file {["/data", "/data/config"]:
