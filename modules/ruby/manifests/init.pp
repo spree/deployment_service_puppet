@@ -17,12 +17,6 @@ class ruby {
     require => User['spree']
   }
 
-  include rvm::system
-
-  rvm::system_user { spree:
-    require => User['spree']
-  }
-
   file {"/etc/gemrc":
     ensure => "present",
     source  => "puppet:///modules/common/gemrc"
@@ -61,7 +55,44 @@ class ruby {
 
   } 
 
-  package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop']:
+  package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
+            'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'libreadline5-dev', 'zlib1g', 'zlib1g-dev']:
     ensure => 'present'
   }
+
+  exec { "checkout ruby-build":
+    command => "git clone git://github.com/sstephenson/ruby-build.git",
+    user    => 'spree',
+    group   => 'spree',
+    cwd     => "/home/spree",
+    creates => "/home/spree/ruby-build",
+    path    => ["/usr/bin", "/usr/sbin"],
+    timeout => 100,
+    require => [Package['git-core'], User['spree']
+  }
+
+  exec { "install ruby-build":
+    command => "sh install.sh",
+    user    => "root",
+    group   => "root",
+    cwd     => "/home/spree/ruby-build",
+    onlyif  => '[ -z "$(which ruby-build)" ]', 
+    path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
+    require => Exec['checkout ruby-build'],
+  }
+
+  file {'/usr/rubies':
+    ensure => 'directory',
+    mode   => 775,
+  }
+
+  exec { "install ruby":
+    command => "ruby-build 1.9.3-p0 /usr/local",
+    user    => "root",
+    group   => "root",
+    creates => "/usr/local/ruby"
+    path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
+    require => [ Exec['install ruby-build'], File['/usr/rubies'] ]
+  }
+
 }
