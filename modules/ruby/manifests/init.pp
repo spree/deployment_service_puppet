@@ -87,7 +87,7 @@ class ruby {
   }
 
   exec { "install ruby":
-    command => "ruby-build 1.9.3-p0 /usr/local",
+    command => "ruby-build ${ruby_version} /usr/local",
     user    => "root",
     group   => "root",
     creates => "/usr/local/bin/ruby",
