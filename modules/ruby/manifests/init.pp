@@ -81,11 +81,6 @@ class ruby {
     require => Exec['checkout ruby-build'],
   }
 
-  file {'/usr/rubies':
-    ensure => 'directory',
-    mode   => 775,
-  }
-
   exec { "install ruby":
     command => "ruby-build ${ruby_version} /usr/local",
     user    => "root",
