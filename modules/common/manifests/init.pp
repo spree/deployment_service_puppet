@@ -13,10 +13,9 @@ class common {
     source  => "puppet:///modules/common/sudoers"
   }
 
-  file {'/etc/environment':
-    ensure => 'present',
-    source  => ["/data/config/environment", "/data/config/environment.generated"],
-    require => [ File['/data/config/environment.generated'] ]
+  file { "/usr/share/augeas/lenses/contrib/mysql.aug":
+    ensure => present,
+    source => "puppet:///common/shellvars.aug",
   }
 
   file {["/data", "/data/config"]:
@@ -26,8 +25,4 @@ class common {
     mode => 660 
   }
 
-  file {'/data/config/environment.generated':
-    content  => template("common/environment.erb"),
-    require => [ File['/data'], File['/data/config'] ]
-  }
 }

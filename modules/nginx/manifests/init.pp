@@ -38,18 +38,11 @@ define nginx::site {
   # uses generated file from below, or overriden version
   #
   file { "/etc/nginx/sites-available/${name}":
-    source => ["/data/config/nginx/${name}", "/data/config/nginx/${name}.generated"],
+    content => template("nginx/sites-available/site.erb"),
     require => [ Package['nginx'] ],# File["/data/config/nginx/${name}.generated"], File["/etc/ssl/${name}.crt"], File["/etc/ssl/${name}.key"] ],
     notify => Service['nginx']
   }
 
-  # generate local file first from template
-  #
-  file { "/data/config/nginx/${name}.generated":
-    content => template("nginx/sites-available/site.erb"),
-    require => File['/data/config/nginx']
-  }
-  
   exec { "ln -nfs /etc/nginx/sites-available/${name} /etc/nginx/sites-enabled/${name}":
     creates => "/etc/nginx/sites-enabled/${name}",
     require => File["/etc/nginx/sites-available/${name}"],
