@@ -87,9 +87,16 @@ class ruby {
     user    => "root",
     group   => "root",
     creates => "/usr/local/bin/ruby",
+    onlyif  => "[ ! -f /home/spree/${ruby-version} ]", 
     timeout => 0, #disable timeout
     path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
     require => [ Exec['install ruby-build'], File['/usr/rubies'] ]
+  }
+
+  file { "/home/spree/${ruby-version}":
+    ensure  => 'present',
+    content => 'installed',
+    require => [ Exec['install ruby'] ]
   }
 
 }
