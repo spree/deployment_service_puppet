@@ -56,7 +56,8 @@ class ruby {
   } 
 
   package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
-            'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'libreadline5-dev', 'zlib1g', 'zlib1g-dev']:
+            'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'libreadline5-dev', 'zlib1g', 
+            'zlib1g-dev', 'libxml2', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
     ensure => 'present'
   }
 
