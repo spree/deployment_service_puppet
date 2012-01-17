@@ -13,8 +13,10 @@ class common {
     source  => "puppet:///modules/common/sudoers"
   }
 
-  file { "/usr/share/augeas/lenses/contrib/mysql.aug":
+  file { "/etc/profile.d/set_env_vars.sh":
     ensure => present,
+    mode   => 777,
+    content  => template("common/set_env_vars.sh.erb"),
     source => "puppet:///common/shellvars.aug",
   }
 
