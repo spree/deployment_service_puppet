@@ -57,7 +57,7 @@ class ruby {
 
   package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
             'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'libreadline5-dev', 'zlib1g', 
-            'zlib1g-dev', 'libxml2', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
+            'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
     ensure => 'present'
   }
 
@@ -90,13 +90,14 @@ class ruby {
     onlyif  => "[ ! -f /home/spree/${ruby-version} ]", 
     timeout => 0, #disable timeout
     path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
-    require => [ Exec['install ruby-build'], File['/usr/rubies'] ]
+    subscribe => File["/home/spree/${ruby_version}"],
+    require => [ Exec['install ruby-build'] ]
   }
 
-  file { "/home/spree/${ruby-version}":
+  file { "/home/spree/${ruby_version}":
     ensure  => 'present',
     content => 'installed',
-    require => [ Exec['install ruby'] ]
+    require => User['spree']
   }
 
 }
