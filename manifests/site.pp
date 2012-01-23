@@ -1,6 +1,6 @@
 import "modules"
-
-Exec { path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/rvm/bin' }
+ 
+Exec { path => [ "/usr/local/bin", "/usr/bin/", "/usr/sbin/", "/bin", "/sbin" ] }
 
 node default {
   include puppetclient

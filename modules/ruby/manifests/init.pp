@@ -7,13 +7,18 @@ class ruby {
     groups => ['www-data', 'sudo']
   }
 
+ # Not setting Spree password as it should be done manually
+ # for more security
+ # exec{ "chpasswd-spree":
+ #   command => "echo spree:${db_pass} | chpasswd",
+ #   subscribe => User['spree'],
+ #   refreshonly => true
+ # }
+
   file {'/etc/init':
+    ensure => 'directory',
     group => 'spree',
     mode => 775,
-    require => User['spree']
-  }
-
-  spree::app{"$app_name":
     require => User['spree']
   }
 
@@ -22,42 +27,23 @@ class ruby {
     source  => "puppet:///modules/common/gemrc"
   }
 
-  if $rvm_installed == "true" {
-    rvm_system_ruby {$ruby_version:
-      ensure => 'present',
-      default_use => true
+  case $operatingsystem {
+    "Ubuntu", "Debian": {
+      package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
+               'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'zlib1g', 
+                'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
+        ensure => 'present'
+      }  
+    
+      case $operatingsystemrelease {
+        "6.0.1", "10.04", "11.04": { $libreadline = 'libreadline5-dev' }
+        "11.10": { $libreadline = 'libreadline-gplv2-dev' }
+      }
     }
+  }
 
-    rvm_gem {"${ruby_version}/bundler":
-        ensure => 'present',
-        require => Rvm_system_ruby[$ruby_version]
-    }
-
-    rvm_gem {"${ruby_version}/rake":
-        ensure => 'present',
-        require => Rvm_system_ruby[$ruby_version]
-    }
-
-    rvm_gem {"${ruby_version}/net-ssh":
-        ensure => '2.1.4',
-        require => Rvm_system_ruby[$ruby_version]
-    }
-
-    rvm_gem {"${ruby_version}/net-scp":
-        ensure => '1.0.4',
-        require => Rvm_system_ruby[$ruby_version]
-    }
-
-    rvm_gem {"${ruby_version}/backup":
-        ensure => 'present',
-        require => Rvm_system_ruby[$ruby_version]
-    }
-
-  } 
-
-  package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
-            'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'libreadline5-dev', 'zlib1g', 
-            'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
+  package {'libreadline':
+    name => $libreadline,
     ensure => 'present'
   }
 
@@ -68,6 +54,7 @@ class ruby {
     cwd     => "/home/spree",
     creates => "/home/spree/ruby-build",
     path    => ["/usr/bin", "/usr/sbin"],
+    logoutput => 'on_failure',
     timeout => 100,
     require => [Package['git-core'], User['spree']]
   }
@@ -78,6 +65,7 @@ class ruby {
     group   => "root",
     cwd     => "/home/spree/ruby-build",
     onlyif  => '[ -z "$(which ruby-build)" ]', 
+    logoutput => 'on_failure',
     path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
     require => Exec['checkout ruby-build'],
   }
@@ -86,18 +74,42 @@ class ruby {
     command => "ruby-build ${ruby_version} /usr/local",
     user    => "root",
     group   => "root",
-    creates => "/usr/local/bin/ruby",
-    onlyif  => "[ ! -f /home/spree/${ruby-version} ]", 
     timeout => 0, #disable timeout
     path    => ["/bin", "/usr/local/bin", "/usr/bin", "/usr/sbin"],
-    subscribe => File["/home/spree/${ruby_version}"],
+    logoutput => 'true', 
+    subscribe => File["/home/spree/ruby_version"],
+    refreshonly => 'true',
     require => [ Exec['install ruby-build'] ]
   }
 
-  file { "/home/spree/${ruby_version}":
+  file { "/home/spree/ruby_version":
     ensure  => 'present',
-    content => 'installed',
+    content => inline_template("<%= ruby_version %>"),
     require => User['spree']
   }
 
+  # force puppet to install gems using
+  # ruby-build version and not system ruby
+  file { "/usr/bin/gem":
+    ensure => "/usr/local/bin/gem",
+    require => Exec['install ruby']
+  }
+
+  package { ['bundler', 'foreman', 'rake', 'backup']:
+    ensure => 'installed',
+    provider => 'gem',
+    require => File['/usr/bin/gem']
+  }
+
+  package { ['net-ssh']:
+    ensure => '2.1.4',
+    provider => 'gem',
+    require => File['/usr/bin/gem']
+  }
+
+  package { ['net-scp']:
+    ensure => '1.0.4',
+    provider => 'gem',
+    require => File['/usr/bin/gem']
+  }
 }

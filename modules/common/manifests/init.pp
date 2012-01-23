@@ -19,7 +19,7 @@ class common {
     content  => template("common/set_env_vars.sh.erb"),
   }
 
-  file {["/data", "/data/config"]:
+  file {["/data", "/data/config", "/data/config/ssl"]:
     ensure => "directory", 
     owner => "spree", 
     group => "www-data", 

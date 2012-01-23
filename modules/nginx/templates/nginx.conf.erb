@@ -3,39 +3,38 @@ worker_processes 2;
 pid /var/run/nginx.pid;
 
 events {
-	worker_connections 768;
-	# multi_accept on;
+  worker_connections 768;
+  # multi_accept on;
 }
 
 http {
+  ##
+  # Basic Settings
+  ##
 
-	##
-	# Basic Settings
-	##
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay off;
+  keepalive_timeout 5 5;
+  types_hash_max_size 2048;
+  # server_tokens off;
 
-	sendfile on;
-	tcp_nopush on;
-	tcp_nodelay off;
-	keepalive_timeout 5 5;
-	types_hash_max_size 2048;
-	# server_tokens off;
+  # server_names_hash_bucket_size 64;
+  # server_name_in_redirect off;
 
-	# server_names_hash_bucket_size 64;
-	# server_name_in_redirect off;
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
 
-	include /etc/nginx/mime.types;
-	default_type application/octet-stream;
+  ##
+  # Logging Settings
+  ##
 
-	##
-	# Logging Settings
-	##
+  access_log /var/log/nginx/access.log;
+  error_log /var/log/nginx/error.log;
 
-	access_log /var/log/nginx/access.log;
-	error_log /var/log/nginx/error.log;
-
-	##
-	# Gzip Settings
-	##
+  ##
+  # Gzip Settings
+  ##
 
   gzip                    on;
   gzip_static             on;
@@ -48,10 +47,10 @@ http {
   gzip_proxied            any;
   gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
-	##
-	# Virtual Host Configs
-	##
+  ##
+  # Virtual Host Configs
+  ##
 
-	include /etc/nginx/conf.d/*.conf;
-	include /etc/nginx/sites-enabled/*;
+  include /etc/nginx/conf.d/*.conf;
+  include /etc/nginx/sites-enabled/*;
 }
