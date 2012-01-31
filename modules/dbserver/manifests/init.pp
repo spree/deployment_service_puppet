@@ -45,7 +45,7 @@ class dbserver {
     timeout => 100,
     logoutput => "true",
     subscribe => File['/home/spree/demo_version'],
-    require => File['/data/spree/current/config/database.yml'],
+    require => File['/data/spree/shared/config/database.yml'],
     refreshonly => true,
     onlyif => $demo_deploy
   }

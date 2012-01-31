@@ -47,7 +47,7 @@ define spree::demo(){
     timeout => 100,
     logoutput => 'on_failure',
     subscribe => File['/home/spree/demo_version'],
-    refreshonly => true,
+    creates => '/data/spree/releases/demo',
     require => [ Package['git-core'], User['spree'] ] 
   }
 

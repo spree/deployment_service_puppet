@@ -36,7 +36,7 @@ class ruby {
       }  
     
       case $operatingsystemrelease {
-        "6.0.1", "10.04", "11.04": { $libreadline = 'libreadline5-dev' }
+        /6.0.\d/, "10.04", "11.04": { $libreadline = 'libreadline5-dev' }
         "11.10": { $libreadline = 'libreadline-gplv2-dev' }
       }
     }
@@ -94,6 +94,9 @@ class ruby {
     ensure => "/usr/local/bin/gem",
     require => Exec['install ruby']
   }
+  package { rubygems: 
+    ensure => latest,
+    require => file['/usr/bin/gem'] }
 
   package { ['bundler', 'foreman', 'rake', 'backup']:
     ensure => 'installed',
