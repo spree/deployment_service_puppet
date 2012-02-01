@@ -29,6 +29,14 @@ define spree::app(){
     group => "www-data",
     mode => 660
   }
+
+  file {"/data/${name}/shared/config/.foreman":
+    content => template("spree/dot-foreman.erb"),
+    require => File["/data/${name}/shared/config"],
+    owner => "spree",
+    group => "www-data",
+    mode => 660
+  }
 }
 
 define spree::demo(){

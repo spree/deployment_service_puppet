@@ -1,5 +1,11 @@
 upstream unicorn_<%= app_name %> {
   server unix:/data/<%= app_name %>/shared/sockets/unicorn.sock fail_timeout=0;
+  <%- if loadbalancer -%>
+  <%- app_server_ips.each do |app_server_ip| -%>
+    <%- next if app_server_ip == server_ip -%>
+  server <%= app_server_ip %>:5000;
+  <%- end -%>
+  <%- end -%>
 }
 
 server {
