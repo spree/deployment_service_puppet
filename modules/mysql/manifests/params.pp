@@ -5,7 +5,7 @@ class mysql::params {
     default => "/etc/mysql/my.cnf",
   }
 
-  $mycnfctx = "/files/${mycnf}"
+  $mycnfctx = "/files${mycnf}"
 
   $data_dir = $mysql_data_dir ? {
     "" => "/var/lib/mysql",
@@ -20,6 +20,15 @@ class mysql::params {
   $replication_binlog_format = $replication_binlog_format ? {
     "" => "STATEMENT",
     default => $replication_binlog_format,
+  }
+
+  $logfile_group = $mysql_logfile_group ? {
+    '' => $operatingsystem ? {
+        'RedHat' => 'mysql',
+        'Debian' => 'adm',
+        default  => 'adm',
+      },
+    default => $mysql_logfile_group,
   }
 
 }

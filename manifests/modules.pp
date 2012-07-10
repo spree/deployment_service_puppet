@@ -1,7 +1,6 @@
 import "puppetclient"
 import "common"
 import "augeas"
-import "mysql"
 import "app"
 import "appserver"
 import "dbserver"

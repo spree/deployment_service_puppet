@@ -4,7 +4,7 @@ class ruby {
     home => '/home/spree',
     shell => '/bin/bash',
     managehome => 'true',
-    groups => ['www-data', 'sudo']
+    groups => ['www-data', 'sudo', 'adm']
   }
 
  # Not setting Spree password as it should be done manually
@@ -30,7 +30,7 @@ class ruby {
   case $operatingsystem {
     "Ubuntu", "Debian": {
       package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
-               'git-core', 'build-essential', 'libssl-dev', 'libreadline5', 'zlib1g', 
+               'graphicsmagick-libmagick-dev-compat', 'git-core', 'build-essential', 'libssl-dev',
                 'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
         ensure => 'present'
       }  
@@ -38,6 +38,7 @@ class ruby {
       case $operatingsystemrelease {
         /6.0.\d/, "10.04", "11.04": { $libreadline = 'libreadline5-dev' }
         "11.10": { $libreadline = 'libreadline-gplv2-dev' }
+        "12.04": { $libreadline = 'libreadline6-dev' }
       }
     }
   }
@@ -101,18 +102,18 @@ class ruby {
   package { ['bundler', 'foreman', 'rake', 'backup']:
     ensure => 'installed',
     provider => 'gem',
-    require => File['/usr/bin/gem']
+    require => [ Package['rubygems'], File['/usr/bin/gem'] ]
   }
 
   package { ['net-ssh']:
     ensure => '2.1.4',
     provider => 'gem',
-    require => File['/usr/bin/gem']
+    require => [ Package['rubygems'], File['/usr/bin/gem'] ]
   }
 
   package { ['net-scp']:
     ensure => '1.0.4',
     provider => 'gem',
-    require => File['/usr/bin/gem']
+    require => [ Package['rubygems'], File['/usr/bin/gem'] ]
   }
 }

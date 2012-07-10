@@ -14,16 +14,13 @@ $subversion_backupdir = "/var/backups/subversion"
 */
 class mysql::backup {
 
+  include mysql::common
   include mysql::params
 
   if $mysqldump_retention {} else { $mysqldump_retention = "week" }
 
   $data_dir = $mysql::params::data_dir
   $backup_dir = $mysql::params::backup_dir
-
-  if !defined(Group["mysql-admin"]) {
-    group { "mysql-admin": ensure => present,}
-  }
 
   file { "${backup_dir}":
     ensure  => directory,

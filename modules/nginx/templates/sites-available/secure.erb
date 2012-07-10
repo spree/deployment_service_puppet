@@ -1,14 +1,23 @@
-upstream unicorn_<%= app_name %> {
+upstream unicorn_<%= app_name %>_secure {
   server unix:/data/<%= app_name %>/shared/sockets/unicorn.sock fail_timeout=0;
+  <%- if loadbalancer -%>
+  <%- app_server_ips.each do |app_server_ip| -%>
+    <%- next if app_server_ip == server_ip -%>
+  server <%= app_server_ip %>:5000;
+  <%- end -%>
+  <%- end -%>
 }
+
 server {
   listen 443;
+  client_max_body_size 4G;
 
   ssl on;
   ssl_certificate         /etc/ssl/<%= app_name %>.crt;
   ssl_certificate_key     /etc/ssl/<%= app_name %>.key;
   ssl_protocols SSLv3 TLSv1;
-  ssl_ciphers ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:!LOW:!SSLv2:!EXPORT;
+  ssl_ciphers RC4:HIGH:!aNULL:!MD5;
+  ssl_prefer_server_ciphers on;
 
   root /data/<%= app_name %>/current/public;
 
@@ -21,7 +30,7 @@ server {
     proxy_redirect off;
 
     if (!-f $request_filename) {
-      proxy_pass http://unicorn_<%= app_name %>;
+      proxy_pass http://unicorn_<%= app_name %>_secure;
       break;
     }
   }

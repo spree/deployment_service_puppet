@@ -52,7 +52,7 @@ define spree::demo(){
     user    => 'spree',
     group   => 'spree',
     cwd     => "/data/spree/releases",
-    timeout => 100,
+    timeout => 500,
     logoutput => 'on_failure',
     subscribe => File['/home/spree/demo_version'],
     creates => '/data/spree/releases/demo',
@@ -77,46 +77,74 @@ define spree::demo(){
     require => [Exec['checkout spree-demo']]
   }   
 
+  file { "/data/spree/current/.foreman":
+    ensure => "/data/spree/shared/config/.foreman",
+    require => [Exec['checkout spree-demo']]
+  }   
+
   exec { "bundle install demo":
     command  => "bundle install --gemfile /data/spree/releases/demo/Gemfile --path /data/spree/shared/bundle --deployment --without development test",
     user      => 'spree',
     group     => 'spree',
     cwd       => "/data/spree/releases/demo",
     logoutput => 'on_failure',
-    timeout   => 300,
+    timeout   => 3000,
     subscribe => Exec['checkout spree-demo'],
     refreshonly => true,
-    require   => [Exec['checkout spree-demo']]
+    require   => [Exec['checkout spree-demo'], File["/data/${name}/current/config/database.yml"] ]
   }
 
   exec { "foreman export demo":
-    command => "bundle exec foreman export upstart /etc/init -a spree -u spree",
-    subscribe => Exec['checkout spree-demo'],
-    refreshonly => true,
+    command => "bundle exec foreman export upstart /etc/init",
+    creates => '/etc/init/spree.conf',
     user => 'spree',
     group => 'spree',
     cwd => "/data/spree/releases/demo",
-    path => ["/usr/local/bin"],
     logoutput => 'on_failure',
     timeout => 300,
-    require => [ File["/data/spree/current/Procfile"], Exec["bundle install demo"] ]
+    require => [ File["/data/spree"], File["/data/spree/current/.foreman"], File["/data/spree/current/Procfile"], Exec["bundle install demo"] ]
   }
 
   exec { "precompile assets for demo":
-    command  => "bundle exec rake assets:precompile",
-    subscribe => Exec['checkout spree-demo'],
-    refreshonly => true,
+    command   => "bundle exec rake assets:precompile",
     user      => 'spree',
     group     => 'spree',
     cwd       => "/data/spree/releases/demo",
-    logoutput => 'on_failure',
+    logoutput => 'true',
     timeout   => 1000,
-    require   => [ Exec["bundle install demo"] ]
+    onlyif    => "/bin/sh -c 'bundle exec rake db:version --trace RAILS_ENV=${rails_env} | grep \"Current version: [0-9]\{5,\}\"'",
+    creates   => "/data/spree/releases/demo/public/assets",
+    notify    => [Exec["restart spree"], Exec["start spree"] ],
+    require   => [ Exec["bundle install demo"], File["/data/${name}/current/config/database.yml"] ]
   }
 
-  service { "spree":
-    provider => 'upstart',
-    ensure => 'running',
-    require => Exec['foreman export demo']
+  exec { "restart spree":
+    command   => "/bin/sh -c 'restart spree'",
+    user      => 'root',
+    group     => 'root',
+    cwd       => "/data/spree/releases/demo",
+    logoutput => 'true',
+    timeout   => 1000,
+    refreshonly => true,
+    require => [ Exec['foreman export demo'] ]
+  }
+
+  #service { "spree":
+  #  provider => 'upstart',
+  #  ensure => 'running',
+  #  require => [Exec['foreman export demo'] ]
+  #}
+
+# exec below only required while service above is not working
+# due to client 2.7.14 problems
+
+  exec { "start spree":
+    command   => "/bin/sh -c 'start spree'",
+    user      => 'root',
+    group     => 'root',
+    cwd       => "/data/spree/releases/demo",
+    logoutput => 'true',
+    timeout   => 1000,
+    require => [ Exec['foreman export demo'] ]
   }
 }

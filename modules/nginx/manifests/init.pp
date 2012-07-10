@@ -43,7 +43,7 @@ define nginx::site {
 
   exec { "ln -nfs /etc/nginx/sites-available/${name}-secure /etc/nginx/sites-enabled/${name}-secure":
     require => File["/etc/nginx/sites-available/${name}-secure"],
-    onlyif => "test -f /data/config/ssl/${name}.crt -a -f /data/config/ssl/${name}.key",
+    onlyif => "test -f /etc/ssl/${name}.crt -a -f /etc/ssl/${name}.key",
     notify => Service['nginx']
   }
 }
