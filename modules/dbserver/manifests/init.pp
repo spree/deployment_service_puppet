@@ -47,7 +47,10 @@ class dbserver {
       ensure   => present,
       database => $app_name,
       user     => "spree",
-      host     => $db_server,
+      host     => $db_server ? {
+	'127.0.0.1' => 'localhost',
+	default => $db_server
+      },
       password => $db_pass,
       notify   => Exec['reset database for demo'],
       require  => Mysql::Database["${app_name}"]
@@ -57,7 +60,10 @@ class dbserver {
       ensure   => present,
       database => $app_name,
       user     => "spree",
-      host     => $db_server,
+      host     => $db_server ? {
+	'127.0.0.1' => 'localhost',
+	default => $db_server
+      },
       password => $db_pass,
       require  => Mysql::Database["${app_name}"]
     }
