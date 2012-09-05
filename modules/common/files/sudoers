@@ -1,0 +1,16 @@
+# /etc/sudoers
+
+Defaults	env_reset
+
+# User privilege specification
+root	ALL=(ALL) ALL
+
+# Allow members of group sudo to execute any command after they have
+# provided their password
+# (Note that later entries override this, so you might need to move
+# it further down)
+%sudo ALL=(ALL) ALL
+
+# Allow spree control upstart without providing password (capistrano)
+spree ALL=NOPASSWD: /sbin/start,/sbin/stop,/sbin/restart,/sbin/status
+

@@ -1,0 +1,24 @@
+Backup::Model.new(:today, 'Client: <%= client_code %> Application: <%= app_name %>') do
+
+  database MySQL do |database|
+    database.name               = '<%= app_name %>'
+    database.username           = 'spree'
+    database.password           = '<%= db_pass %>'
+    database.host		= '<%= db_server %>'
+    database.additional_options = ['--single-transaction', '--quick']
+  end
+
+  archive :shared do |archive|
+    archive.add     '/data/<%= app_name %>/shared/'
+    archive.exclude '/data/<%= app_name %>/shared/bundle'
+    archive.exclude '/data/<%= app_name %>/shared/cached-copy'
+    archive.exclude '/data/<%= app_name %>/shared/pids'
+    archive.exclude '/data/<%= app_name %>/shared/log'
+    archive.exclude '/data/<%= app_name %>/shared/sockets'
+    archive.exclude '/data/<%= app_name %>/shared/tmp'
+  end
+
+  compress_with Gzip do |compression|
+    compression.best = true
+  end
+end
