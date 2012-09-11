@@ -35,4 +35,8 @@ parameters:
 
 The *classes* (with the empty strings) refer to the Puppet modules that will get applied to a particular server, in the example above those are *”common”, “appserver”, “dbserver” and “app”*. 
 
+
 These classes correspond to modules located in the modules:https://github.com/spree/deployment_service_puppet/tree/master/modules directory.
+
+
+The *parameters* are the variables which are reference throughout the puppet modules to include server / configuration specific details in all the necessary locations. The values depend directly on the information supplied when configuring the deployment on spreecommerce.com.
