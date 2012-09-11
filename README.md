@@ -1,7 +1,7 @@
 Spree Deployment Service - Puppet Configuration
 ===============================================
 
-These are the Puppet manifests used by Spree's Deployment Service, some aspects of the deployment service are integrated directly with spreecommerce.com and cannot be open sourced at this point.
+These are the Puppet modules used by Spree's Deployment Service, some aspects of the deployment service are integrated directly with spreecommerce.com and cannot be open sourced at this point.
 
 We encourage contributions and improvements.
 
@@ -33,4 +33,6 @@ parameters:
   app_name: spree
 ````
 
-The *classes* (with the empty strings) refer to the Puppet modules that will get applied to a particular server, in the example above those are *”common”, “appserver”, “dbserver” and “app”*. These classes correspond to modules located in the modules:https://github.com/spree/deployment_service_puppet/tree/master/modules directory.
+The *classes* (with the empty strings) refer to the Puppet modules that will get applied to a particular server, in the example above those are *”common”, “appserver”, “dbserver” and “app”*. 
+
+These classes correspond to modules located in the modules:https://github.com/spree/deployment_service_puppet/tree/master/modules directory.
