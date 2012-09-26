@@ -39,3 +39,8 @@ server {
     root /data/<%= app_name %>/current/public;
   }
 }
+
+server {
+  server_name www.<%= fqdn %>;
+  rewrite ^(.*)$ http://<%= fqdn %>$1 permanent;
+}
