@@ -1,4 +1,3 @@
-import "apt"
 import "puppetclient"
 import "common"
 import "augeas"

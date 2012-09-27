@@ -1,12 +1,19 @@
 class nginx {
-  package { "nginx":
-    ensure => "present"
+  exec { "add-apt-repository nginx":
+    command => "add-apt-repository ppa:nginx/stable && apt-get update",
+    alias => "nginx_repository",
+    require => Package["python-software-properties"],
+    refreshonly => true,
+    subscribe => Package["python-software-properties"],
   }
-  apt::ppa { "ppa:nginx/ppa": }
+
+  package { "python-software-properties":
+    ensure => installed,
+  }
 
   package { "nginx":
     ensure => "present",
-    require => [ Apt::Ppa['ppa:nginx/ppa'] ]
+    require => [ Exec['add-apt-repository nginx'] ]
   }
 
   service { "nginx":
