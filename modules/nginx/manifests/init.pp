@@ -2,12 +2,18 @@ class nginx {
   package { "nginx":
     ensure => "present"
   }
-  
+  apt::ppa { "ppa:nginx/ppa": }
+
+  package { "nginx":
+    ensure => "present",
+    require => [ Apt::Ppa['ppa:nginx/ppa'] ]
+  }
+
   service { "nginx":
     ensure => "running",
     enable => true,
     require => [Package['nginx'], File['/etc/nginx/nginx.conf'] ]
-  } 
+  }
 
   file { "/etc/nginx/nginx.conf":
     content => ["/data/config/nginx/nginx.conf", template("nginx/nginx.conf.erb")],
