@@ -1,5 +1,5 @@
 class dbserver {
-#include mysql::server
+#  include mysql::server
   case $db_server_type {
       'medium': { include mysql::server::medium } 
       'large':  { include mysql::server::large  } 
@@ -42,32 +42,36 @@ class dbserver {
     }
   }
 
-  if $deploy_demo { 
-    mysql::rights{"demo-${app_name}-rights":
-      ensure   => present,
-      database => $app_name,
-      user     => "spree",
-      host     => $db_server ? {
-	'127.0.0.1' => 'localhost',
-	default => $db_server
-      },
-      password => $db_pass,
-      notify   => Exec['reset database for demo'],
-      require  => Mysql::Database["${app_name}"]
-    }
-  }else{
-    mysql::rights{"${app_name}-rights":
-      ensure   => present,
-      database => $app_name,
-      user     => "spree",
-      host     => $db_server ? {
-	'127.0.0.1' => 'localhost',
-	default => $db_server
-      },
-      password => $db_pass,
-      require  => Mysql::Database["${app_name}"]
-    }
+  define mysql-user(){
+	  if $deploy_demo { 
+	    mysql::rights{"demo-${app_name}-rights-${name}":
+	      ensure   => present,
+	      database => $app_name,
+	      user     => "spree",
+	      host     => $db_server ? {
+		'127.0.0.1' => 'localhost',
+		default => $name
+	      },
+	      password => $db_pass,
+	      notify   => Exec['reset database for demo'],
+	      require  => Mysql::Database["${app_name}"]
+	    }
+	  }else{
+	    mysql::rights{"${app_name}-rights-${name}":
+	      ensure   => present,
+	      database => $app_name,
+	      user     => "spree",
+	      host     => $db_server ? {
+		'127.0.0.1' => 'localhost',
+		default => $name
+	      },
+	      password => $db_pass,
+	      require  => Mysql::Database["${app_name}"]
+	    }
+	  }
   }
+
+  mysql-user{$app_server_ips:}
 
   mysql::database{"${app_name}":
     ensure   => present    
