@@ -84,11 +84,11 @@ class dbserver {
       command => "bundle exec rake db:migrate db:reset AUTO_ACCEPT=true RAILS_ENV=${rails_env}",
       user    => 'spree',
       group   => 'spree',
-      cwd     => "/data/spree/current",
+      cwd     => "/data/${app-name}/current",
       timeout => 1000,
       logoutput => "true",
-      subscribe => File['/home/spree/demo_version'],
-      require => [ Exec['bundle install demo'], File['/data/spree/shared/config/database.yml'] ],
+      subscribe => File["/home/${app-name}/demo_version"],
+      require => [ Exec['bundle install demo'], File["/data/${app-name}/shared/config/database.yml"] ],
       refreshonly => true
     }
 
@@ -96,7 +96,7 @@ class dbserver {
       command => "bundle exec rake spree_sample:load AUTO_ACCEPT=true RAILS_ENV=${rails_env}",
       user    => 'spree',
       group   => 'spree',
-      cwd     => "/data/spree/current",
+      cwd     => "/data/${app-name}/current",
       timeout => 1000,
       logoutput => "true",
       subscribe => Exec["reset database for demo"],

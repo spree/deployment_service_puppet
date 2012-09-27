@@ -1,6 +1,6 @@
 class appserver {
   include nginx
-  
+
   nginx::site{"$app_name":}
 
   file {"/data/${app_name}/shared/config/unicorn.rb":

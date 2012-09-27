@@ -1,5 +1,5 @@
-app: spree
+app: <%= app_name %>
 user: spree
-log: /data/spree/shared/log
+log: /data/<%= app_name %>/shared/log
 host: 127.0.0.1
 concurrency: web=<%= classes.include?('appserver') ? '1' : '0' %>
