@@ -1,5 +1,5 @@
-upstream unicorn_<%= app_name %>_secure {
-  server unix:/data/<%= app_name %>/shared/sockets/unicorn.sock fail_timeout=0;
+upstream unicorn_<%= name %>_secure {
+  server unix:/data/<%= name %>/shared/sockets/unicorn.sock fail_timeout=0;
   <%- if loadbalancer -%>
   <%- app_server_ips.each do |app_server_ip| -%>
     <%- next if app_server_ip == server_ip -%>
@@ -13,13 +13,13 @@ server {
   client_max_body_size 4G;
 
   ssl on;
-  ssl_certificate         /etc/ssl/<%= app_name %>.crt;
-  ssl_certificate_key     /etc/ssl/<%= app_name %>.key;
+  ssl_certificate         /etc/ssl/<%= name %>.crt;
+  ssl_certificate_key     /etc/ssl/<%= name %>.key;
   ssl_protocols SSLv3 TLSv1;
   ssl_ciphers RC4:HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers on;
 
-  root /data/<%= app_name %>/current/public;
+  root /data/<%= name %>/current/public;
 
   location / {
     proxy_set_header X_FORWARDED_PROTO https;
@@ -30,7 +30,7 @@ server {
     proxy_redirect off;
 
     if (!-f $request_filename) {
-      proxy_pass http://unicorn_<%= app_name %>_secure;
+      proxy_pass http://unicorn_<%= name %>_secure;
       break;
     }
   }
@@ -43,6 +43,6 @@ server {
 
   error_page 500 502 503 504 /500.html;
   location = /500.html {
-    root /data/<%= app_name %>/current/public;
+    root /data/<%= name %>/current/public;
   }
 }

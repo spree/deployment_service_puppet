@@ -1,5 +1,5 @@
-upstream unicorn_<%= app_name %> {
-  server unix:/data/<%= app_name %>/shared/sockets/unicorn.sock fail_timeout=0;
+upstream unicorn_<%= name %> {
+  server unix:/data/<%= name %>/shared/sockets/unicorn.sock fail_timeout=0;
   <%- if loadbalancer -%>
   <%- app_server_ips.each do |app_server_ip| -%>
     <%- next if app_server_ip == server_ip -%>
@@ -15,7 +15,7 @@ server {
 
   keepalive_timeout 5;
 
-  root /data/<%= app_name %>/current/public;
+  root /data/<%= name %>/current/public;
 
   location / {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -23,7 +23,7 @@ server {
     proxy_redirect off;
 
     if (!-f $request_filename) {
-      proxy_pass http://unicorn_<%= app_name %>;
+      proxy_pass http://unicorn_<%= name %>;
       break;
     }
   }
@@ -36,6 +36,6 @@ server {
 
   error_page 500 502 503 504 /500.html;
   location = /500.html {
-    root /data/<%= app_name %>/current/public;
+    root /data/<%= name %>/current/public;
   }
 }

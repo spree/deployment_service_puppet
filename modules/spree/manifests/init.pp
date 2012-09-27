@@ -39,6 +39,10 @@ define spree::app(){
   }
 }
 
+
+# demo is only every defined for the 'spree' application
+# so we don't refer to the $app_name variable
+#
 define spree::demo(){
 
   file { "/home/spree/demo_version":

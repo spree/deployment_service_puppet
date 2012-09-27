@@ -1,4 +1,5 @@
 class dbserver {
+# only required for 10.04 -- need to drop support for it.
 #  include mysql::server
   case $db_server_type {
       'medium': { include mysql::server::medium } 
@@ -42,11 +43,20 @@ class dbserver {
     }
   }
 
+  # nested defines needed to get permissions
+  # set correctly for each app and ip pair
+  # $app_name is an array, so is $app_server_ips
+  #
   define mysql-user(){
+    mysql-user-rights{$app_name:
+      ip => $name
+    } 
+  }
+  define mysql-user-rights($ip){
 	  if $deploy_demo { 
-	    mysql::rights{"demo-${app_name}-rights-${name}":
+	    mysql::rights{"demo-${name}-rights-${ip}":
 	      ensure   => present,
-	      database => $app_name,
+	      database => $name,
 	      user     => "spree",
 	      host     => $db_server ? {
 		'127.0.0.1' => 'localhost',
@@ -54,41 +64,44 @@ class dbserver {
 	      },
 	      password => $db_pass,
 	      notify   => Exec['reset database for demo'],
-	      require  => Mysql::Database["${app_name}"]
+	      require  => Mysql::Database["${name}"]
 	    }
 	  }else{
-	    mysql::rights{"${app_name}-rights-${name}":
+	    mysql::rights{"${name}-rights-${ip}":
 	      ensure   => present,
-	      database => $app_name,
+	      database => $name,
 	      user     => "spree",
 	      host     => $db_server ? {
 		'127.0.0.1' => 'localhost',
 		default => $name
 	      },
 	      password => $db_pass,
-	      require  => Mysql::Database["${app_name}"]
+	      require  => Mysql::Database["${name}"]
 	    }
 	  }
   }
 
   mysql-user{$app_server_ips:}
 
-  mysql::database{"${app_name}":
+  mysql::database{$app_name:
     ensure   => present    
   }
 
 
+  # only spree app can get demo deployed,
+  # so the name is hardcoded on purpose
+  #
   if $deploy_demo { 
     #gets notified by mysql rights above
     exec { "reset database for demo":
       command => "bundle exec rake db:migrate db:reset AUTO_ACCEPT=true RAILS_ENV=${rails_env}",
       user    => 'spree',
       group   => 'spree',
-      cwd     => "/data/${app-name}/current",
+      cwd     => "/data/spree/current",
       timeout => 1000,
       logoutput => "true",
-      subscribe => File["/home/${app-name}/demo_version"],
-      require => [ Exec['bundle install demo'], File["/data/${app-name}/shared/config/database.yml"] ],
+      subscribe => File["/home/spree/demo_version"],
+      require => [ Exec['bundle install demo'], File["/data/spree/shared/config/database.yml"] ],
       refreshonly => true
     }
 
@@ -96,7 +109,7 @@ class dbserver {
       command => "bundle exec rake spree_sample:load AUTO_ACCEPT=true RAILS_ENV=${rails_env}",
       user    => 'spree',
       group   => 'spree',
-      cwd     => "/data/${app-name}/current",
+      cwd     => "/data/spree/current",
       timeout => 1000,
       logoutput => "true",
       subscribe => Exec["reset database for demo"],
