@@ -39,7 +39,7 @@ define spree::app(){
   }
 
   file {"/data/${name}/shared/config/bluepill_master.pill.erb":
-    content => template("spree/bluepill_master.pill.erb"),
+    source  => "puppet:///modules/spree/bluepill_master.pill.erb"
     require => File["/data/${name}/shared/config"],
     owner => "spree",
     group => "www-data",
