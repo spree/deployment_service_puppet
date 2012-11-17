@@ -12,5 +12,5 @@ root	ALL=(ALL) ALL
 %sudo ALL=(ALL) ALL
 
 # Allow spree control upstart without providing password (capistrano)
-spree ALL=NOPASSWD: /sbin/start,/sbin/stop,/sbin/restart,/sbin/status
+spree ALL=NOPASSWD: /usr/local/bin/bluepill
 

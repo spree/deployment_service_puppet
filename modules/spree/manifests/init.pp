@@ -37,6 +37,14 @@ define spree::app(){
     group => "www-data",
     mode => 660
   }
+
+  file {"/data/${name}/shared/config/bluepill_master.pill.erb":
+    content => template("spree/bluepill_master.pill.erb"),
+    require => File["/data/${name}/shared/config"],
+    owner => "spree",
+    group => "www-data",
+    mode => 660
+  }
 }
 
 

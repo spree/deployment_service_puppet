@@ -33,8 +33,8 @@ class ruby {
                'graphicsmagick-libmagick-dev-compat', 'git-core', 'build-essential', 'libssl-dev',
                 'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
         ensure => 'present'
-      }  
-    
+      }
+
       case $operatingsystemrelease {
         /6.0.\d/, "10.04", "11.04": { $libreadline = 'libreadline5-dev' }
         "11.10": { $libreadline = 'libreadline-gplv2-dev' }
@@ -99,7 +99,7 @@ class ruby {
     ensure => latest,
     require => file['/usr/bin/gem'] }
 
-  package { ['bundler', 'foreman', 'rake', 'backup']:
+  package { ['bundler', 'foreman', 'rake', 'backup', 'bluepill']:
     ensure => 'installed',
     provider => 'gem',
     require => [ Package['rubygems'], File['/usr/bin/gem'] ]

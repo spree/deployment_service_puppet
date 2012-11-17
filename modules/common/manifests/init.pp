@@ -20,10 +20,10 @@ class common {
   }
 
   file {["/data", "/data/config"]:
-    ensure => "directory", 
-    owner => "spree", 
-    group => "www-data", 
-    mode => 660 
+    ensure => "directory",
+    owner => "spree",
+    group => "www-data",
+    mode => 660
   }
 
 }
