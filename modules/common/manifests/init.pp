@@ -26,7 +26,7 @@ class common {
     mode => 660
   }
 
-  file {"/etc/init/bluepill":
+  file {"/etc/init/bluepill.conf":
     content => template("common/bluepill_upstart.erb"),
     mode => 600
   }
@@ -34,6 +34,6 @@ class common {
   service { "bluepill":
     provider => 'upstart',
     ensure => 'running',
-    require => [File['/etc/init/bluepill'] ]
+    require => [File['/etc/init/bluepill.conf'] ]
   }
 }
