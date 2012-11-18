@@ -16,10 +16,9 @@ class mysql::params {
   $port                = 3306
   $etc_root_password   = false
   $ssl                 = false
-  $restart             = true
 
   case $::operatingsystem {
-    'Ubuntu': {
+    "Ubuntu": {
       $service_provider = upstart
     }
     default: {

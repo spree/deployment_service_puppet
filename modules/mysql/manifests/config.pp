@@ -6,7 +6,7 @@
 #   [*old_root_password*] - previous root user password,
 #   [*bind_address*]      - address to bind service.
 #   [*port*]              - port to bind service.
-#   [*etc_root_password*] - whether to save /etc/my.cnf.
+#   [*etc_root_password*] - whether to save /etc/.my.cnf.
 #   [*service_name*]      - mysql service name.
 #   [*config_file*]       - my.cnf configuration file path.
 #   [*socket*]            - mysql socket.
@@ -15,10 +15,6 @@
 #   [*ssl_ca]             - path to ssl-ca
 #   [*ssl_cert]           - path to ssl-cert
 #   [*ssl_key]            - path to ssl-key
-#   [*log_error]          - path to mysql error log
-#   [*default_engine]     - configure a default table engine
-#   [*root_group]         - use specified group for root-owned files
-#   [*restart]            - whether to restart mysqld (true/false)
 #
 # Actions:
 #
@@ -50,18 +46,14 @@ class mysql::config(
   $ssl_key           = $mysql::params::ssl_key,
   $log_error         = $mysql::params::log_error,
   $default_engine    = 'UNSET',
-  $root_group        = $mysql::params::root_group,
-  $restart           = $mysql::params::restart
+  $root_group        = $mysql::params::root_group
 ) inherits mysql::params {
 
   File {
     owner  => 'root',
     group  => $root_group,
     mode   => '0400',
-    notify    => $restart ? {
-      true => Exec['mysqld-restart'],
-      false => undef,
-    },
+    notify => Exec['mysqld-restart'],
   }
 
   if $ssl and $ssl_ca == undef {
@@ -98,10 +90,7 @@ class mysql::config(
       logoutput => true,
       unless    => "mysqladmin -u root -p'${root_password}' status > /dev/null",
       path      => '/usr/local/sbin:/usr/bin:/usr/local/bin',
-      notify    => $restart ? {
-        true => Exec['mysqld-restart'],
-        false => undef,
-      },
+      notify    => Exec['mysqld-restart'],
       require   => File['/etc/mysql/conf.d'],
     }
 
@@ -115,10 +104,6 @@ class mysql::config(
         content => template('mysql/my.cnf.pass.erb'),
         require => Exec['set_mysql_rootpw'],
       }
-    }
-  } else {
-    file { '/root/.my.cnf':
-      ensure  => present,
     }
   }
 

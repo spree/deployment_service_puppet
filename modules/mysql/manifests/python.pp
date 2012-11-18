@@ -19,8 +19,8 @@ class mysql::python(
 ) inherits mysql::params {
 
   package { 'python-mysqldb':
-    ensure => $package_ensure,
     name   => $package_name,
+    ensure => $package_ensure,
   }
 
 }
