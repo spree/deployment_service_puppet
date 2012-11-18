@@ -1,39 +1,13 @@
 class dbserver {
-# only required for 10.04 -- need to drop support for it.
-#  include mysql::server
-  case $db_server_type {
-      'medium': { include mysql::server::medium } 
-      'large':  { include mysql::server::large  } 
-      'huge':   { include mysql::server::huge  } 
-      default:  { include mysql::server::medium } 
+  class { 'mysql::server':
+    config_hash => { 'root_password' => 'foo' }
   }
 
-  #puppet clients 2.7.14 or later don't need custom augeas lens
-  #older versions do, hence this case statement
-  case $puppetversion {
-    "2.7.14":{
-      mysql::config {
-        'bind-address':
-          value   => $db_server,
-          notify => Service["mysql"]
+  mysql::server::config { 'testfile':
+    settings => {
+      'mysqld' => {
+        'bind-address' => db_server,
       }
-    }
-    default: {
-      file { "/usr/share/augeas/lenses/contrib/mysql.aug":
-        ensure => present,
-        source => "puppet:///dbserver/mysql.aug",
-      }
-
-     augeas { "my.cnf/mysqld-spree":
-       context => "${mysql::params::mycnfctx}/mysqld/",
-       load_path => "/usr/share/augeas/lenses/contrib/",
-       changes => [
-        "set bind-address ${db_server}",
-       ],
-       require => [ File["/etc/mysql/my.cnf"], File["${mysql::params::data_dir}"] ],
-       notify => Service["mysql"],
-     }
-
     }
   }
 
@@ -43,50 +17,15 @@ class dbserver {
     }
   }
 
-  # nested defines needed to get permissions
-  # set correctly for each app and ip pair
-  # $app_name is an array, so is $app_server_ips
-  #
-  define mysql-user(){
-    mysql-user-rights{$app_name:
-      ip => $name
-    } 
-  }
-  define mysql-user-rights($ip){
-	  if $deploy_demo { 
-	    mysql::rights{"demo-${name}-rights-${ip}":
-	      ensure   => present,
-	      database => $name,
-	      user     => "spree",
-	      host     => $db_server ? {
-		'127.0.0.1' => 'localhost',
-		default => $name
-	      },
-	      password => $db_pass,
-	      notify   => Exec['reset database for demo'],
-	      require  => Mysql::Database["${name}"]
-	    }
-	  }else{
-	    mysql::rights{"${name}-rights-${ip}":
-	      ensure   => present,
-	      database => $name,
-	      user     => "spree",
-	      host     => $db_server ? {
-		'127.0.0.1' => 'localhost',
-		default => $name
-	      },
-	      password => $db_pass,
-	      require  => Mysql::Database["${name}"]
-	    }
-	  }
+  define db-for-app(){
+    mysql::db { "${name}":
+      user     => $name,
+      password => $db_pass,
+      host     => $app_server_ips,
+    }
   }
 
-  mysql-user{$app_server_ips:}
-
-  mysql::database{$app_name:
-    ensure   => present    
-  }
-
+  db-for-app($app_name:)
 
   # only spree app can get demo deployed,
   # so the name is hardcoded on purpose

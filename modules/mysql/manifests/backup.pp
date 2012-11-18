@@ -1,49 +1,71 @@
-/*
-== Class: mysql::backup
+# Class: mysql::backup
+#
+# This module handles ...
+#
+# Parameters:
+#   [*backupuser*]     - The name of the mysql backup user.
+#   [*backuppassword*] - The password of the mysql backup user.
+#   [*backupdir*]      - The target directory of the mysqldump.
+#   [*backupcompress*] - Boolean to compress backup with bzip2.
+#
+# Actions:
+#   GRANT SELECT, RELOAD, LOCK TABLES ON *.* TO 'user'@'localhost'
+#    IDENTIFIED BY 'password';
+#
+# Requires:
+#   Class['mysql::config']
+#
+# Sample Usage:
+#   class { 'mysql::backup':
+#     backupuser     => 'myuser',
+#     backuppassword => 'mypassword',
+#     backupdir      => '/tmp/backups',
+#     backupcompress => true,
+#   }
+#
+class mysql::backup (
+  $backupuser,
+  $backuppassword,
+  $backupdir,
+  $backupcompress = true,
+  $ensure = 'present'
+) {
 
-Enable mysql daily backup script.
-
-The script /usr/local/bin/mysql-backup.sh will be run every night. It runs
-mysqldump --all-databases. Backups will be stored in /var/backups/mysql.
-
-Attributes:
-- $mysqldump_retention: defines if backup rotate on a weekly, monthly or yearly
-  basis. Accepted values: "week", "month", "year". Defaults to "week".
-$subversion_backupdir = "/var/backups/subversion"
-
-*/
-class mysql::backup {
-
-  include mysql::common
-  include mysql::params
-
-  if $mysqldump_retention {} else { $mysqldump_retention = "week" }
-
-  $data_dir = $mysql::params::data_dir
-  $backup_dir = $mysql::params::backup_dir
-
-  file { "${backup_dir}":
-    ensure  => directory,
-    owner   => "root",
-    group   => "mysql-admin",
-    mode    => 750,
-    require => Group["mysql-admin"]
+  database_user { "${backupuser}@localhost":
+    ensure        => $ensure,
+    password_hash => mysql_password($backuppassword),
+    provider      => 'mysql',
+    require       => Class['mysql::config'],
   }
 
-  file { "/usr/local/bin/mysql-backup.sh":
-    ensure  => present,
-    content => template("mysql/mysql-backup.sh.erb"),
-    owner   => "root",
-    group   => "root",
-    mode    => 555,
+  database_grant { "${backupuser}@localhost":
+    privileges => [ 'Select_priv', 'Reload_priv', 'Lock_tables_priv', 'Show_view_priv' ],
+    require    => Database_user["${backupuser}@localhost"],
   }
 
-  cron { "mysql-backup":
-    command => "/usr/local/bin/mysql-backup.sh ${mysqldump_retention}",
-    user    => "root",
-    hour    => 2,
-    minute  => 0,
-    require => [File["${backup_dir}"], File["/usr/local/bin/mysql-backup.sh"]],
+  cron { 'mysql-backup':
+    ensure  => $ensure,
+    command => '/usr/local/sbin/mysqlbackup.sh',
+    user    => 'root',
+    hour    => 23,
+    minute  => 5,
+    require => File['mysqlbackup.sh'],
   }
 
+  file { 'mysqlbackup.sh':
+    ensure  => $ensure,
+    path    => '/usr/local/sbin/mysqlbackup.sh',
+    mode    => '0700',
+    owner   => 'root',
+    group   => 'root',
+    content => template('mysql/mysqlbackup.sh.erb'),
+  }
+
+  file { 'mysqlbackupdir':
+    ensure => 'directory',
+    path   => $backupdir,
+    mode   => '0700',
+    owner  => 'root',
+    group  => 'root',
+  }
 }
