@@ -38,12 +38,21 @@ define spree::app(){
     mode => 660
   }
 
-  file {"/data/${name}/shared/config/bluepill_master.pill.erb":
+  file {"/data/${name}/shared/config/master.pill.erb":
     source  => "puppet:///modules/spree/bluepill_master.pill.erb",
     require => File["/data/${name}/shared/config"],
     owner => "spree",
     group => "www-data",
     mode => 660
+  }
+
+  file {"/data/${name}/shared/config/${name}.pill":
+    content => template("spree/placeholder.pill.erb"),
+    require => File["/data/${name}/shared/config"],
+    owner => "spree",
+    group => "www-data",
+    mode => 660,
+    replace => false
   }
 }
 
@@ -107,8 +116,8 @@ define spree::demo(){
   }
 
   exec { "foreman export demo":
-    command => "bundle exec foreman export upstart /etc/init",
-    creates => '/etc/init/spree.conf',
+    command => "bundle exec foreman export bluepill /data/spree/shared/config/ --template=/data/spree/shared/config/",
+    creates => '/data/spree/shared/config/spree.pill',
     user => 'spree',
     group => 'spree',
     cwd => "/data/spree/releases/demo",
@@ -126,37 +135,9 @@ define spree::demo(){
     timeout   => 1000,
     onlyif    => "/bin/sh -c 'bundle exec rake db:version --trace RAILS_ENV=${rails_env} | grep \"Current version: [0-9]\{5,\}\"'",
     creates   => "/data/spree/releases/demo/public/assets",
-    notify    => [Exec["restart spree"], Exec["start spree"] ],
+#    notify    => [Exec["restart spree"], Exec["start spree"] ],
     require   => [ Exec["bundle install demo"], File["/data/${name}/current/config/database.yml"] ]
   }
 
-  exec { "restart spree":
-    command   => "/bin/sh -c 'restart spree'",
-    user      => 'root',
-    group     => 'root',
-    cwd       => "/data/spree/releases/demo",
-    logoutput => 'true',
-    timeout   => 1000,
-    refreshonly => true,
-    require => [ Exec['foreman export demo'] ]
-  }
 
-  #service { "spree":
-  #  provider => 'upstart',
-  #  ensure => 'running',
-  #  require => [Exec['foreman export demo'] ]
-  #}
-
-# exec below only required while service above is not working
-# due to client 2.7.14 problems
-
-  exec { "start spree":
-    command   => "/bin/sh -c 'start spree'",
-    user      => 'root',
-    group     => 'root',
-    cwd       => "/data/spree/releases/demo",
-    logoutput => 'true',
-    timeout   => 1000,
-    require => [ Exec['foreman export demo'] ]
-  }
 }

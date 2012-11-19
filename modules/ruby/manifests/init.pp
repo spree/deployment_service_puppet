@@ -1,4 +1,6 @@
 class ruby {
+  include mysql::ruby
+
   user {'spree':
     ensure => 'present',
     home => '/home/spree',
@@ -29,7 +31,7 @@ class ruby {
 
   case $operatingsystem {
     "Ubuntu", "Debian": {
-      package {['imagemagick', 'mysql-client', 'libmysql-ruby', 'libmysqlclient-dev', 'libxml2', 'htop',
+      package {['imagemagick', 'libmysqlclient-dev', 'libxml2', 'htop',
                'graphicsmagick-libmagick-dev-compat', 'git-core', 'build-essential', 'libssl-dev',
                 'zlib1g-dev', 'libxml2-dev', 'libxslt1-dev', 'sqlite3', 'libsqlite3-dev']:
         ensure => 'present'

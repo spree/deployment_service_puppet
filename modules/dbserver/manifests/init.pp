@@ -1,31 +1,52 @@
 class dbserver {
+  include mysql
+
   class { 'mysql::server':
-    config_hash => { 'root_password' => 'foo' }
+    config_hash => { 'bind_address' => $db_server }
   }
 
-  mysql::server::config { 'testfile':
-    settings => {
-      'mysqld' => {
-        'bind-address' => db_server,
-      }
+  define create-dbs(){ 
+    if $db_pass == "" {
+      $db_pass = "spree123"
+    }
+
+    database { $name:
+      ensure  => 'present'
+    }
+
+    # always allow localhost access
+    #
+    database_user { "${name}@localhost":
+      password_hash => mysql_password($db_pass)
+    }
+
+    database_grant { "${name}@localhost/${name}":
+      privileges => ['all'] ,
+    }
+
+    # prepend db name onto each app server ip, to create:
+    # db_name@127.0.0.1
+    #
+    $user_ips = regsubst($app_server_ips, '.*', "${name}@\0")
+
+    database_user { $user_ips:
+      password_hash => mysql_password($db_pass)
+    }
+
+    # prepend AND appends db name onto each app server ip, to create:
+    # db_name@127.0.0.1/db_name
+    #
+    $user_ips_dbs = regsubst($app_server_ips, '.*', "${name}@\0/${name}")
+
+    database_grant { $user_ips_dbs:
+      privileges => ['all'] ,
     }
   }
 
-  case $db_pass {
-    "": { $db_pass = "spree123"
-      warning("db_pass not set, using default.")
-    }
-  }
-
-  define db-for-app(){
-    mysql::db { "${name}":
-      user     => $name,
-      password => $db_pass,
-      host     => $app_server_ips,
-    }
-  }
-
-  db-for-app($app_name:)
+  # using a custom type as app_name maybe an array
+  # so we need to create mutliple db's
+  # 
+  create-dbs{$app_name:} 
 
   # only spree app can get demo deployed,
   # so the name is hardcoded on purpose
@@ -40,7 +61,7 @@ class dbserver {
       timeout => 1000,
       logoutput => "true",
       subscribe => File["/home/spree/demo_version"],
-      require => [ Exec['bundle install demo'], File["/data/spree/shared/config/database.yml"] ],
+      require => [ Database_grant["spree@localhost/spree"], Exec['bundle install demo'], File["/data/spree/shared/config/database.yml"] ],
       refreshonly => true
     }
 

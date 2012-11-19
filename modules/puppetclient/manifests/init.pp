@@ -1,11 +1,10 @@
 class puppetclient{
-  include augeas
 
-  #service {"puppet":
-  #  ensure => "stopped",
-  #  enable => false,
-  #  require =>[ Augeas['set puppet start default'], Augeas['set puppet pluginsync'] ]
-  #}
+  service {"puppet":
+    ensure => "stopped",
+    enable => false,
+    require =>[ Augeas['set puppet start default'], Augeas['set puppet pluginsync'] ]
+  }
 
   augeas {"set puppet start default":
     context => "/files/etc/default/puppet",

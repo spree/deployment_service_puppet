@@ -3,9 +3,9 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
   app.gid = "<%= user %>"
   app.working_dir = "/data/<%= app %>/current/"
 
-<%- if engine.process_names.include? 'unicorn' -%>
-<%- process = engine.process('unicorn') -%>
-  <%- port = engine.port_for(process, 1) -%>
+<% if engine.process_names.include? 'unicorn' %>
+<% process = engine.process('unicorn') %>
+  <% port = engine.port_for(process, 1) %>
   app.process('unicorn') do |process|
     process.pid_file = "/data/<%= app %>/shared/pids/unicorn.pid"
 
@@ -27,12 +27,11 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
 
     process.group = "unicorn"
   end
-<%- end -%>
-
-<%- engine.process_names.reject{ |p| p == 'unicorn' }.each do |name| -%>
-<%- process = engine.process(name) -%>
-<%- 1.upto(engine.formation[name]) do |num| -%>
-  <%- port = engine.port_for(process, num) -%>
+<% end %>
+<% engine.process_names.reject{ |p| p == 'unicorn' }.each do |name| %>
+<% process = engine.process(name) %>
+<% 1.upto(engine.formation[name]) do |num| %>
+  <% port = engine.port_for(process, num) %>
   app.process("<%= name %>-<%= num %>") do |process|
     process.start_command = "<%= process.command %>"
 
@@ -52,6 +51,6 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
     process.group = "<%= name %>"
   end
 
-<%- end -%>
+<% end %>
 <% end %>
 end

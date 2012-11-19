@@ -34,6 +34,6 @@ class common {
   service { "bluepill":
     provider => 'upstart',
     ensure => 'running',
-    require => [File['/etc/init/bluepill.conf'] ]
+    require => [File['/etc/init/bluepill.conf'], Package['bluepill'] ]
   }
 }
