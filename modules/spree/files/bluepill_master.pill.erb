@@ -4,7 +4,7 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
   app.working_dir = "/data/<%= app %>/current/"
 
 <% if engine.process_names.include? 'unicorn' %>
-<% process = engine.process('unicorn') %>
+<% process = engine.process('<%= app %>-unicorn') %>
   <% port = engine.port_for(process, 1) %>
   app.process('unicorn') do |process|
     process.pid_file = "/data/<%= app %>/shared/pids/unicorn.pid"
@@ -25,14 +25,14 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
       child_process.checks :cpu_usage, :every => 10.seconds, :below => 20, :times => [3,4], :fires => :stop
     end
 
-    process.group = "unicorn"
+    process.group = "<%= app %>-unicorn"
   end
 <% end %>
 <% engine.process_names.reject{ |p| p == 'unicorn' }.each do |name| %>
 <% process = engine.process(name) %>
 <% 1.upto(engine.formation[name]) do |num| %>
   <% port = engine.port_for(process, num) %>
-  app.process("<%= name %>-<%= num %>") do |process|
+  app.process("<%= app %>-<%= name %>-<%= num %>") do |process|
     process.start_command = "<%= process.command %>"
 
     process.pid_file = "/data/<%= app %>/shared/pids/<%= name %>-<% num %>.pid"
@@ -48,7 +48,7 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
       children.stop_command "kill {{PID}}"
     end
 
-    process.group = "<%= name %>"
+    process.group = "<%= app%>-<%= name %>"
   end
 
 <% end %>
