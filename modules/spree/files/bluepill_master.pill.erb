@@ -35,7 +35,7 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
   app.process("<%= name %>-<%= num %>") do |process|
     process.start_command = "<%= process.command %>"
 
-    process.pid_file = "/data/<%= app %>/shared/pids/<%= name %>-<% num %>.pid"
+    process.pid_file = "/data/<%= app %>/shared/pids/<%= name %>-<%= num %>.pid"
     process.daemonize = true
     process.environment = <%= engine.env.merge("PORT" => port.to_s).inspect %>
     process.stop_signals = [:quit, 30.seconds, :term, 5.seconds, :kill]
