@@ -15,9 +15,9 @@ Bluepill.application("<%= app %>", :foreground => false, :log_file => "/data/<%=
 
     process.environment = <%= engine.env.merge("PORT" => port.to_s).inspect %>
 
-    process.stop_grace_time = 30.seconds
-    process.start_grace_time = 30.seconds
-    process.restart_grace_time = 30.seconds
+    process.stop_grace_time = 60.seconds
+    process.start_grace_time = 60.seconds
+    process.restart_grace_time = 60.seconds
 
     process.monitor_children do |child_process|
       child_process.stop_command = "kill -QUIT {{PID}}"
