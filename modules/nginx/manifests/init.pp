@@ -39,6 +39,7 @@ define nginx::site {
   file { "/etc/nginx/sites-available/${name}":
     content => template("nginx/sites-available/site.erb"),
     require => [ Package['nginx'] ],
+    replace => false,
     notify => Service['nginx']
   }
 
@@ -51,6 +52,7 @@ define nginx::site {
   file { "/etc/nginx/sites-available/${name}-secure":
     content => template("nginx/sites-available/secure.erb"),
     require => [ Package['nginx'] ],
+    replace => false,
     notify => Service['nginx']
   }
 
