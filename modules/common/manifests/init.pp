@@ -34,6 +34,6 @@ class common {
   service { "bluepill":
     provider => 'upstart',
     ensure => 'running',
-    require => [File['/etc/init/bluepill.conf'], Package['bluepill'] ]
+    require => [ Spree::App[$app_name], File['/etc/init/bluepill.conf'], Package['bluepill'] ]
   }
 }

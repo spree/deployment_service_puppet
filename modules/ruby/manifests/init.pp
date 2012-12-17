@@ -1,4 +1,5 @@
 class ruby {
+  include mysql
   include mysql::ruby
 
   user {'spree':

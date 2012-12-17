@@ -115,15 +115,29 @@ define spree::demo(){
     require   => [Exec['checkout spree-demo'], File["/data/${name}/current/config/database.yml"] ]
   }
 
+  # use subscribe here as pill gets created with a placeholder
+  # by default to let bluepill start when we're not deploying a demo
+  # so we can't use creates.
+
   exec { "foreman export demo":
-    command => "bundle exec foreman export bluepill /data/spree/shared/config/ --template=/data/spree/shared/config/",
-    creates => '/data/spree/shared/config/spree.pill',
+    command => "bundle exec foreman export bluepill /data/spree/shared/config",
     user => 'spree',
     group => 'spree',
     cwd => "/data/spree/releases/demo",
-    logoutput => 'on_failure',
+    logoutput => true,
     timeout => 300,
+    refreshonly => true,
+    subscribe => File["/data/spree/current/Procfile"],
     require => [ File["/data/spree"], File["/data/spree/current/.foreman"], File["/data/spree/current/Procfile"], Exec["bundle install demo"] ]
+  }
+
+  exec { "restart bluepill":
+    command => "bluepill load /data/spree/shared/config/spree.pill",
+    cwd => "/data/spree/releases/demo",
+    timeout => 300,
+    logoutput => true,
+    refreshonly => true,
+    subscribe => Exec["foreman export demo"],
   }
 
   exec { "precompile assets for demo":
@@ -135,7 +149,7 @@ define spree::demo(){
     timeout   => 1000,
     onlyif    => "/bin/sh -c 'bundle exec rake db:version --trace RAILS_ENV=${rails_env} | grep \"Current version: [0-9]\{5,\}\"'",
     creates   => "/data/spree/releases/demo/public/assets",
-#    notify    => [Exec["restart spree"], Exec["start spree"] ],
+    notify    => [Exec["restart bluepill"] ],
     require   => [ Exec["bundle install demo"], File["/data/${name}/current/config/database.yml"] ]
   }
 
